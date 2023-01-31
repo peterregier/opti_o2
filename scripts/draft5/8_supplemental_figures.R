@@ -47,7 +47,7 @@ par_boxplot <- ggplot(df_ts, aes(season2, par)) +
   geom_boxplot(fill = "gray") + 
   scale_y_continuous(trans = "sqrt") + 
   stat_compare_means(label.x = 1.5, label = "p.signif") + 
-  labs(x = "", y = "PAR")
+  labs(x = "", y = "SFD (W/m2)")
 
 rain_boxplot <- ggplot(df_ts, aes(season2, rain_mm_1d)) + 
   geom_boxplot(fill = "gray") + 
