@@ -23,7 +23,8 @@ source("scripts/draft5/0_constants.R")
 
 ## Read in model metrics (R2/NSE/etc)
 metrics <- read_csv("data/model_metrics.csv") %>% 
-  mutate(season = fct_relevel(season, "Spring/Summer"))
+  mutate(season2 = case_when(season == "Spring/Summer" ~ "Summer", 
+                             season == "Fall/Winter" ~ "Winter"))
 
 fi <- read_csv("data/model_feature_importance.csv") %>% 
   mutate(season = fct_relevel(season, "Spring/Summer")) %>% 
@@ -35,18 +36,20 @@ model_data <- read_csv("data/model_predictions.csv") %>%
   mutate(season = fct_relevel(season, "Spring/Summer"))
 
 ## Data for S1
-df_ts <- read_csv("data/220930_data_with_features.csv")
+df_ts <- read_csv("data/220930_data_with_features.csv") %>% 
+  mutate(season2 = case_when(season == "Spring/Summer" ~ "Summer", 
+                             season == "Fall/Winter" ~ "Winter"))
 
 
 # 3. S1: precip/PAR boxplots ---------------------------------------------------
 
-par_boxplot <- ggplot(df_ts, aes(fct_relevel(as.factor(season), "Spring/Summer"), par)) + 
+par_boxplot <- ggplot(df_ts, aes(season2, par)) + 
   geom_boxplot(fill = "gray") + 
   scale_y_continuous(trans = "sqrt") + 
   stat_compare_means(label.x = 1.5, label = "p.signif") + 
   labs(x = "", y = "PAR")
 
-rain_boxplot <- ggplot(df_ts, aes(fct_relevel(as.factor(season), "Spring/Summer"), rain_mm_1d)) + 
+rain_boxplot <- ggplot(df_ts, aes(season2, rain_mm_1d)) + 
   geom_boxplot(fill = "gray") + 
   scale_y_continuous(trans = "sqrt") + 
   stat_compare_means(label.x = 1.5, label = "p.signif") + 
@@ -59,12 +62,12 @@ ggsave("graphs/draft5/S1_climate-boxplots.pdf", width = 6, height = 3)
 # 4. S2: GOF figure ------------------------------------------------------------
 
 metrics_by_window <- metrics %>% 
-  select(season, window_c, r2, nse) %>% 
+  select(season2, window_c, r2, nse) %>% 
   pivot_longer(cols = c(r2, nse))
 
 metrics_all <- metrics %>%
   #filter(window_c == "S4" | window_c == "F1") %>% 
-  group_by(season) %>% 
+  group_by(season2) %>% 
   summarize(R2 = mean(r2), 
             NSE = mean(nse))
 
@@ -72,7 +75,8 @@ ggplot(metrics_by_window, aes(window_c, value, fill = name)) +
   geom_col(position = "dodge") + 
   geom_hline(data = metrics_all, aes(yintercept = R2)) + 
   geom_hline(data = metrics_all, aes(yintercept = NSE), linetype = "dashed") + 
-  facet_wrap(~season, nrow = 1, scales = "free_x")
+  facet_wrap(~season2, nrow = 1, scales = "free_x") + 
+  labs(x = "Test window", y = "R2/NSE Value", fill = "Metric")
 ggsave("graphs/draft5/S2_model_GOF.png", width = 6, height = 4)
 
 
