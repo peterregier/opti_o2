@@ -1,7 +1,7 @@
 ## This script constructs the models and associated info for the Opti-O2 
-## manuscript. There are several modeling decisions that were made in a prior
-## script (220928_parameterize_models.R) where a combination of NSE and R2
-## were used to determine the best set of parameters to maximize fits for all
+## manuscript. There are several modeling decisions that were made prior to this 
+## script where a combination of NSE and R2 were used to determine the best set 
+##of parameters to maximize fits for all
 ## WINDOWS of each season (Spring/Summer and Fall/Winter). The parameters are:
 ### # of windows (# of splits for individual test datasets): 5 (~spring-neap cycles)
 ### MTRY: 5 (Best for Fall/Winter, 6 was best for Spring/Summer, but 5 also 
@@ -9,6 +9,12 @@
 ### BOOTSTRAP TYPE: moving, which consistently outperformed circular and nonoverlapping
 ### BLOCK SIZE: 576 (2 days) - best for Spring/Summer, close 2nd for Fall/Winter, 
 ### (only looked at 1-day and 2-day blocks to match lags)
+## 
+## Updated 2022-04-11 by pjr
+##
+# ####################### #
+# ####################### #
+
 
 # 1. Setup ---------------------------------------------------------------------
 
@@ -20,25 +26,27 @@ p_load(cowplot, #plot_grid
        rsample, 
        ranger,
        rangerts,
+       recipes, # prep()
        suncalc, #getSunlightPosition
        tictoc, #time stuff
        hydroGOF, #calculate metrics
        lubridate) #force_tz
 
-## Set up lat and long for suncalc calls
-bc_lat = 46.90579
-bc_long = -123.98025
+## Set up lat and long for suncalc calls (not used in final version)
+#bc_lat = 46.90579
+#bc_long = -123.98025
 
 ## Set ggplot theme
 theme_set(theme_bw())
 
+
 # 2. Read in / set up dataset --------------------------------------------------
 
 ## First, read in data
-df <- read_csv("data/220930_data_with_features.csv") %>% 
+df <- read_csv("data/230411_data_with_features.csv") %>% 
   group_by(season) %>% 
-  slice(577:n()) %>% # need to clean out the 
-  mutate(time = as_hms(datetime)) %>% # add time
+  slice(577:n()) %>% # need to clean out the first 2 days with NAs due to lagging
+  #mutate(time = as_hms(datetime)) %>% # add time
   ungroup()
   
 
@@ -58,7 +66,7 @@ n_tree = 1000
 m_try = 7
 
 ## Set up a vector of model variables #R2 of 0.414 and 0.548 for Spring / Winter
-model_vars <- c("time", "creek_temp", "creek_sal", "creek_do", "creek_depth", 
+model_vars <- c("sin_time", "creek_temp", "creek_sal", "creek_do", "creek_depth", 
                 "creek_depth_1d", "creek_sal_1d", "creek_temp_1d", "creek_do_1d", 
                 #"creek_depth_2d", "creek_sal_2d", "creek_temp_2d",  "creek_do_2d",
                 "fp_temp", "fp_sal", "fp_do", "fp_depth", 
@@ -85,10 +93,10 @@ make_model <- function(num_window = num_window,
   model_recipe <- df_train %>% 
     select(-datetime, -window) %>% 
     recipe(seep_do ~ .) %>% 
-    step_integer(time) %>% 
+    #step_integer(time) %>% 
     step_corr(all_predictors()) %>% 
     step_normalize(all_predictors(), -all_outcomes()) %>% 
-    prep()
+    recipes::prep()
   
   test <- model_recipe %>% 
     bake(df_test)
@@ -157,7 +165,7 @@ make_model <- function(num_window = num_window,
   
   ## Finally, calculate fi as percentages
   fi = fi0 %>%
-    filter(predictor != "time") %>% #remove forced column
+    filter(predictor != "sin_time") %>% #remove forced column
     select(predictor, raw_fi) %>%
     mutate(fi = raw_fi / sum(raw_fi)) %>% 
     mutate(season = season_selection, 
@@ -174,9 +182,13 @@ make_model <- function(num_window = num_window,
   return(output)
 }
 
+## Create the actual models, but don't bind so we can pull different elements
+tic("make models") #4.7 min
 models <- model_list %>% 
   pmap(make_model)
+toc()
 
+## Pull specific elements to analyze model performance
 extract_stuff <- function(what_ya_want){
   bind_rows(models) %>% 
     select({{what_ya_want}}) %>% 

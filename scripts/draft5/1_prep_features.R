@@ -1,11 +1,11 @@
-## New script, the goal is to streamline all the data prep decisions and explain 
-## them, in order. Steps: 
-### 1. ID two periods (done in dataset construction)
-### 2. Create features for Creek (1d rolling means)
-### 3. Create features for Floodplain (1d rolling means)
-### 4. Create features for Climate (1 day rolling mean except rain (1/7d sums))
-### 5. Create features for Time (solar altitude, time since solar noon)
-### 6. Assess variables to use based on Boruta
+## Create features (lagged variables) to use as predictor variables in Random
+## Forest models
+## 
+## pjr, 2023-04-11
+##
+# ############## #
+# ############## #
+
 
 # 1. Setup ---------------------------------------------------------------------
 
@@ -15,6 +15,9 @@ p_load(cowplot, #plot_grid
        roll,
        zoo,
        lubridate) #force_tz
+
+
+# 2. Read in data and create features ------------------------------------------
 
 df_raw <- read_csv("data/220929_final_dataset.csv")
 
@@ -51,13 +54,20 @@ df_trimmed <- df_all_rolls %>%
   filter(datetime < as.POSIXct("2020-10-01 00:05:00", tz = "UTC") | 
            datetime >= as.POSIXct("2020-10-03 00:05:00", tz = "UTC")) 
 
+## Last step: sine-transform time of day so there's not a hard change.
+## sin((yday(lubridate::date(datetime_round)) / 365.25) * pi)) 
+df_time_transform <- df_trimmed %>% 
+  mutate(dbl_time = as.numeric(time),
+         sin_time = sin((dbl_time / max(dbl_time))* pi)) %>% 
+  select(-c(time, dbl_time))
 
-# Add windows ------
+
+# 3. Add windows ---------------------------------------------------------------
   
 ## Add windows for final dataset
 num_windows = 5 # number of windows
 
-df <- df_trimmed %>% 
+df <- df_time_transform %>% 
   group_by(season) %>% 
   mutate(window = cut(datetime, num_windows, labels = c(1:num_windows)), 
          window_c = ifelse(season == "Spring/Summer", 
@@ -65,8 +75,8 @@ df <- df_trimmed %>%
                            paste0("F", window))) %>% 
   ungroup()
 
-# Write out ----------
+# 4. Write out -----------------------------------------------------------------
 
-write_csv(df, "data/220930_data_with_features.csv")
+write_csv(df, "data/230411_data_with_features.csv")
 
 

@@ -1,7 +1,13 @@
 ## This  script is the sole source for data used for the paper. It's a bit of a 
 ## beast because it combines a wide range of datasets, calculates a number of 
-## different things, and then trims first based on Opti-O2 guidance, then based 
-## on and also commented well to explain data decisions
+## different things, and then trims  based on Opti-O2 guidance and additional 
+## decisions, explained by comments
+##
+## Updated 4/11/23 by pjr
+##
+# ##################### #
+# ##################### #
+
 
 # 1. Set up environment --------------------------------------------------------
 
@@ -24,7 +30,8 @@ common_tz = "America/Los_Angeles"
 ## columns, rename, and convert characters to numeric, then merge
 
 ## Dataset 1: 06/26/2019 - 06/29/2020
-climate1 <- read_csv("data/draft3_data/climavue_data_5min_20190626-20200629.csv", skip=1) %>% 
+#climate1 <- read_csv("data/draft3_data/climavue_data_5min_20190626-20200629.csv", skip=1) %>% 
+climate1 <- read_csv("data/raw_from_optio2/climavue_data_5min_20190626-20200629.csv", skip=1) %>% 
   slice(3:n()) %>% mutate(datetime = lubridate::force_tz(parsedate::parse_date(TIMESTAMP), 
                                                          common_tz)) %>%
   select(datetime, Rain_mm_Tot, BP_hPa, AirT_C_Avg, SlrFD_kW_Avg) %>% 
@@ -35,7 +42,8 @@ climate1 <- read_csv("data/draft3_data/climavue_data_5min_20190626-20200629.csv"
   drop_na()
 
 ## Dataset 2: 01/21/2020 - 09/24/2021
-climate2 <- read_csv("data/draft3_data/climavue_data_5min_20200121-20210924.csv", skip=1) %>% 
+#climate2 <- read_csv("data/draft3_data/climavue_data_5min_20200121-20210924.csv", skip=1) %>% 
+climate2 <- read_csv("data/raw_from_optio2/climavue_data_5min_20200121-20210924.csv", skip=1) %>% 
   slice(3:n()) %>% mutate(datetime = lubridate::force_tz(parsedate::parse_date(TIMESTAMP), 
                                                          common_tz)) %>%
   select(datetime, Rain_mm_Tot, BP_hPa, AirT_C_Avg, SlrFD_kW_Avg) %>% 
@@ -52,7 +60,8 @@ climate <- dplyr::union(climate1, climate2)
 
 ## Import creek Opti-O2 and Troll combined dataset: convert datetime to dttm 
 ## type, rename, then select useful columns
-creek <- read_csv("./data/draft3_data/Beaver Creek River data 03_05_19 to 06_21_21.csv") %>% 
+#creek <- read_csv("./data/draft3_data/Beaver Creek River data 03_05_19 to 06_21_21.csv") %>% 
+creek <- read_csv("data/raw_from_optio2/Beaver Creek River data 03_05_19 to 06_21_21.csv") %>% 
   mutate(datetime = lubridate::force_tz(parsedate::parse_date(`DT River`), 
                                         common_tz)) %>%
   rename(creek_temp = "T (°C) river", 
@@ -63,7 +72,8 @@ creek <- read_csv("./data/draft3_data/Beaver Creek River data 03_05_19 to 06_21_
 
 ## Import seep Opti-O2 dataset: convert datetime to dttm type, rename, then
 ## select useful columns
-seep <- read_csv("./data/draft3_data/Beaver Creek Seep data 03_05_19 to 02_02_21 no formulas.csv") %>% 
+#seep <- read_csv("./data/draft3_data/Beaver Creek Seep data 03_05_19 to 02_02_21 no formulas.csv") %>% 
+seep <- read_csv("data/raw_from_optio2/Beaver Creek Seep data 03_05_19 to 02_02_21 no formulas.csv") %>% 
   mutate(datetime = lubridate::force_tz(parsedate::parse_date(`Datetime`), 
                                         common_tz), 
          seep_do = coalesce(as.numeric(`Dissolved Oxygen Concentration (mg/L)`), 
@@ -73,7 +83,8 @@ seep <- read_csv("./data/draft3_data/Beaver Creek Seep data 03_05_19 to 02_02_21
 
 ## Import floodplain Opti-O2 and Troll combined dataset: convert datetime to 
 ## dttm type, rename, then select useful columns
-floodplain <- read_csv("./data/draft3_data/Beaver Creek Well data 06_26_19 to 06_21_21.csv") %>% 
+#floodplain <- read_csv("./data/draft3_data/Beaver Creek Well data 06_26_19 to 06_21_21.csv") %>% 
+floodplain <- read_csv("data/raw_from_optio2/Beaver Creek Well data 06_26_19 to 06_21_21.csv") %>% 
   mutate(datetime = lubridate::force_tz(parsedate::parse_date(`Datetime`), 
                                         common_tz)) %>%
   rename(fp_temp = "Calibrated Sensor Temperature (C)", 
