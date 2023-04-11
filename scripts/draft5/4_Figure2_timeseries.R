@@ -9,6 +9,7 @@ p_load(cowplot, #plot_grid
        tidyverse, #keep it tidy
        tidymodels, 
        ggpubr,
+       plotly,
        parsedate, 
        lubridate) #force_tz
 
