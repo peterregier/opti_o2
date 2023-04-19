@@ -46,68 +46,35 @@ windows <- df %>%
   group_by(window_c) %>% 
   summarize(window_start = first(datetime))
 
-## Make a graph for time-series
-# seep_ts <- ggplot(df, aes(datetime, seep_do)) + 
-#   geom_line(color = "gray") + 
-#   geom_smooth(method = "lm", se = F, color = "black") + 
-#   geom_point(data = df %>% filter(fp_depth < 0), aes(datetime, seep_do)) + 
-#   facet_wrap(~fct_relevel(as.factor(season), "Spring/Summer"), 
-#              nrow = 1, scales = "free_x") + 
-#   labs(x = "", y = "Seep DO (mg/L)")
-
-var <- "seep_do"
-
-x <- df %>% 
-  
-  select(datetime, season, var)
-
-ts_x <- tsibble(x, key = season) %>% 
-  fill_gaps() %>% 
- model(classical_decomposition(seep_do)) %>% 
-  components()
-
-
-
-
-
-
-ggplot(df, aes(datetime, seep_do)) + 
-  geom_line(aes(color = season), show.legend = F) + 
-  #geom_smooth(method = "lm", se = F, color = "black") + 
-  geom_vline(data = windows, aes(xintercept = window_start), linetype = "dashed") + 
-  facet_wrap(~fct_relevel(as.factor(season), "Spring/Summer"), 
-             nrow = 1, scales = "free_x") + 
-  labs(x = "", y = "") + 
-  scale_color_manual(values = colors)
-
-
-
 ## Set up function to make time-series graphs
 plot_ts <- function(var, y_lab){
   
   ## Set some constants up
   df$index <- 1:nrow(df)
   
-  colors = c("#595F72", "#46ACC2")
-  p_value_position = max(df %>% select({{var}}) %>% drop_na()) * 0.9
+  colors = c("#46ACC2", "#595F72")
+  p_value_position = max(df %>% dplyr::select({{var}}) %>% drop_na()) * 0.9
 
-  
   ## Make time-series
-  ts_plot <- ggplot(df, aes(datetime, {{var}})) + 
+  ts_plot <- ggplot(df %>% mutate(season = fct_relevel(base::as.factor(season), "Spring/Summer")), 
+                                  aes(datetime, {{var}})) + 
     geom_line(aes(color = season), show.legend = F) + 
     #geom_smooth(method = "lm", se = F, color = "black") + 
     geom_vline(data = windows, aes(xintercept = window_start), linetype = "dashed") + 
-    facet_wrap(~fct_relevel(as.factor(season), "Spring/Summer"), 
+    scale_color_manual(values = colors) +
+    facet_wrap(~season,
+    #facet_wrap(~fct_relevel(base::as.factor(season), "Spring/Summer"), 
                nrow = 1, scales = "free_x") + 
-    labs(x = "", y = y_lab) + 
-    scale_color_manual(values = colors)# + 
+    labs(x = "", y = y_lab)
+    # + 
     #geom_text(data = slopes, aes(x = x, y = y, label = slope))
   
   ## make boxplot
   boxplot <- ggplot(df %>% mutate(season = case_when(season == "Spring/Summer" ~ "S", 
                                                      season == "Fall/Winter" ~ "W"), 
-                                  case = "By Season"), 
-                    aes(fct_relevel(as.factor(season), "S"), {{var}}, fill = season)) + 
+                                  case = "By Season") %>% 
+                      mutate(season = fct_relevel(as.factor(season), "S")), 
+                    aes(season, {{var}}, fill = season)) + 
     geom_boxplot(show.legend = F, width = 0.7) + 
     labs(x = "Season", y = "") + 
     stat_compare_means(label = "p.signif", 
@@ -119,16 +86,27 @@ plot_ts <- function(var, y_lab){
   plot_grid(ts_plot, boxplot, nrow = 1, rel_widths = c(1, 0.2))
 }
 
-
 plot_grid(plot_ts(seep_do, "Seep DO (mg/L)"), 
           plot_ts(air_temp, "Air Temp. (C)"), 
           plot_ts(creek_depth, "Creek depth (cm)"), 
           plot_ts(fp_depth, "FP depth (cm)"), 
           ncol = 1, labels = c("A", "B", "C", "D"))
-ggsave("graphs/draft5/2_Figure2_ts.png", width = 10, height = 8)
+ggsave("graphs/2_Figure2_ts.png", width = 10, height = 8)
 
 
+## Make supplemental table of means by window
 
+## Helper function
+mean_ = function(x){mean(x, na.rm = T)}
+
+means_by_window <- df %>% 
+  group_by(window_c) %>% 
+  summarize(season = first(season),
+            seep_do = mean_(seep_do), 
+            air_temp = mean_(air_temp), 
+            creek_depth = mean_(creek_depth), 
+            fp_depth = mean_(fp_depth))
+write_csv(means_by_window, "data/230418_windowed_means.csv")
 
 
 ## Make supplemental figure for boxplots that may be useful...
@@ -152,7 +130,7 @@ bp_boxplot <-
   labs(x = "", y = "BP (hPa)")
 
 plot_grid(sfd_boxplot, rain_boxplot, nrow = 1)
-ggsave("graphs/draft5/S1_climate-boxplots.pdf", width = 6, height = 3)
+ggsave("graphs/draft5/S5_climate-boxplots.pdf", width = 6, height = 3)
 
 
 

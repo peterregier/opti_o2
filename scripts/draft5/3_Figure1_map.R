@@ -4,7 +4,7 @@
 ## 2. BC watershed with sensor locations noted
 ## 3. 2x transects, one for sensor diagram, one for conceptual model
 ##
-## 2022-10-28
+## 2022-10-28 (updated 2023-04-13)
 ## Peter Regier
 ## 
 # ########### #
@@ -19,6 +19,9 @@ p_load(tidyverse,
        #rgdal,
        rnaturalearth, #ne_states()
        nhdplusTools, 
+       smoothr, #smooth()
+       ggstar, # geom_star()
+       ggspatial, #annotation_north_arrow()
        tmaptools, #crop_shape()
        ggthemes, #theme_map()
        sf)
@@ -45,9 +48,11 @@ bc_location <- tibble(lat = 46.90577, long = -123.98219) %>%
 ## Make the WA map figure
 ggplot() + 
   geom_sf(data = wa, fill = "gray95") + 
-  geom_sf(data = bc_location, size = 2) +
+  geom_star(aes(x = -123.98219, y = 46.90577), 
+            size = 3, fill = "red") +
+  #geom_sf(data = bc_location, size = 5, color = "red") +
   theme_map()
-ggsave("graphs/draft5/1_wa_map_for_Figure1.png", width = 3, height = 2)
+ggsave("graphs/1_wa_map_for_Figure1.png", width = 3, height = 2)
 
 
 # 2. Make the BC map (the heavy lift) ------------------------------------------
@@ -130,7 +135,7 @@ p +
       line_col = "grey20")
   )
 
-ggsave("graphs/draft5/1_bc_map_for_Figure1.png", width = 6, height = 6)
+ggsave("graphs/1_bc_map_for_Figure1.png", width = 6, height = 6)
 
 
 # 3. Now, make the transect for the sensor and conceptual diagrams -------------
@@ -168,7 +173,7 @@ ggplot(bc01_elevation, aes(x = distance_m, y = elev)) +
   scale_x_continuous(expand = c(0,0)) + 
   coord_cartesian(ylim = c(1, 3.5)) +
   theme_classic()
-ggsave("graphs/draft5/221110_transect.pdf", width = 6, height = 3)
+ggsave("graphs/230413_transect.pdf", width = 6, height = 3)
 
 
 

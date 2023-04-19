@@ -63,7 +63,7 @@ block_size = 576
 
 ## Now set hyperparameters
 n_tree = 1000
-m_try = 7
+m_try = 5
 
 ## Set up a vector of model variables #R2 of 0.414 and 0.548 for Spring / Winter
 model_vars <- c("sin_time", "creek_temp", "creek_sal", "creek_do", "creek_depth", 

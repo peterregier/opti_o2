@@ -56,7 +56,7 @@ rain_boxplot <- ggplot(df_ts, aes(season2, rain_mm_1d)) +
   labs(x = "", y = "24h Rain (mm)")
 
 plot_grid(par_boxplot, rain_boxplot, nrow = 1)
-ggsave("graphs/draft5/S1_climate-boxplots.pdf", width = 6, height = 3)
+ggsave("graphs/S3_climate-boxplots.pdf", width = 6, height = 3)
 
 
 # 4. S2: GOF figure ------------------------------------------------------------
@@ -77,7 +77,7 @@ ggplot(metrics_by_window, aes(window_c, value, fill = name)) +
   geom_hline(data = metrics_all, aes(yintercept = NSE), linetype = "dashed") + 
   facet_wrap(~season2, nrow = 1, scales = "free_x") + 
   labs(x = "Test window", y = "R2/NSE Value", fill = "Metric")
-ggsave("graphs/draft5/S2_model_GOF.png", width = 6, height = 4)
+ggsave("graphs/S4_model_GOF.png", width = 6, height = 4)
 
 
 

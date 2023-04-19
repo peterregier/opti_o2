@@ -3,7 +3,7 @@
 ## Figure 3B: stacked geom_col comparing individual variable importance across
 ## season, faceted by driver.
 ##
-## 2022-11-10
+## 2022-11-10 (Updated 2023-04-13)
 ## Peter Regier
 
 
@@ -60,7 +60,7 @@ fi_plot <- ggplot(fi_stats, aes(pred_cat, mean, fill = season2)) +
 # 4. Create Figure 3B stacked bar chart ----------------------------------------
 
 fi_summary <- fi %>% 
-  mutate(pred2 = case_when(grepl("creek_depth", predictor) ~ "Creek depth", 
+  mutate(pred2 = as.factor(case_when(grepl("creek_depth", predictor) ~ "Creek depth", 
                            grepl("creek_sal", predictor) ~ "Creek salinity", 
                            grepl("creek_do", predictor) ~ "Creek DO", 
                            grepl("creek_temp", predictor) ~ "Creek temp", 
@@ -69,18 +69,19 @@ fi_summary <- fi %>%
                            grepl("fp_sal", predictor) ~ "FP salinity", 
                            grepl("fp_depth", predictor) ~ "FP depth", 
                            grepl("rain", predictor) ~ "Rain", 
-                           grepl("temp", predictor) ~ "Temp",
-                           grepl("par", predictor) ~ "SFD",
-                           grepl("hPa", predictor) ~ "BP")) %>% 
+                           grepl("temp", predictor) ~ "Temp.",
+                           grepl("par", predictor) ~ "Solar Flux Dens.",
+                           grepl("hPa", predictor) ~ "Baro. Pressure"))) %>% 
   group_by(pred2, season2) %>% 
   summarize(pred_cat = first(pred_cat), 
             fi = sum(fi)) %>% 
   ungroup() %>% 
   group_by(season2) %>% 
-  mutate(fi_n = fi / sum(fi))
+  mutate(fi_n = fi / sum(fi)) %>% 
+  mutate(pred3 = fct_reorder(pred2, pred_cat))
   
-
-variable_plot <- ggplot(fi_summary, aes(season2, fi * (100/5), fill = pred2)) + 
+## Create plot
+variable_plot <- ggplot(fi_summary, aes(season2, fi * (100/5), fill = pred3)) + 
   # divide by 5 because 5 windows (sum above, mean gave weird values)
   geom_col(width = 0.8, alpha = 0.8) + 
   scale_fill_brewer(palette = "Paired") + 
@@ -99,6 +100,5 @@ print(fi_summary %>%
 
 plot_grid(fi_plot, NULL, variable_plot, nrow = 1, align = "hv",
           rel_widths = c(0.6, 0.1, 1), labels = c("A", "", "B"))
-ggsave("graphs/draft5/3_Figure3_feature_importance.png", 
-       width = 10, height = 5)
+ggsave("graphs/3_Figure3_feature_importance.png", width = 10, height = 5)
 
