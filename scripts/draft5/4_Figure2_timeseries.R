@@ -24,7 +24,9 @@ theme_set(theme_bw())
 # 2. Read in / set up dataset --------------------------------------------------
 
 ## First, read in data
-df <- read_csv("data/230411_data_with_features.csv")
+df <- read_csv("data/230411_data_with_features.csv") %>% 
+  mutate(season = case_when(season == "Spring/Summer" ~ "Spring/Summer 2020", 
+                            season == "Fall/Winter" ~ "Fall 2020 - Winter 2021"))
 
 
 # 3. Calculate some stats ------------------------------------------------------
@@ -36,7 +38,7 @@ df_stats <- df %>%
             fp_depth = mean(fp_depth),
             fp_sal = mean(fp_sal),
             sfd = mean(par),
-            rain_mm = mean(rain_mm))
+            rain_mm = mean(rain_mm)) 
 
 
 # 4. Make time-series graphs ---------------------------------------------------
@@ -56,7 +58,7 @@ plot_ts <- function(var, y_lab){
   p_value_position = max(df %>% dplyr::select({{var}}) %>% drop_na()) * 0.9
 
   ## Make time-series
-  ts_plot <- ggplot(df %>% mutate(season = fct_relevel(base::as.factor(season), "Spring/Summer")), 
+  ts_plot <- ggplot(df %>% mutate(season = fct_relevel(base::as.factor(season), "Spring/Summer 2020")), 
                                   aes(datetime, {{var}})) + 
     geom_line(aes(color = season), show.legend = F) + 
     #geom_smooth(method = "lm", se = F, color = "black") + 
@@ -70,8 +72,8 @@ plot_ts <- function(var, y_lab){
     #geom_text(data = slopes, aes(x = x, y = y, label = slope))
   
   ## make boxplot
-  boxplot <- ggplot(df %>% mutate(season = case_when(season == "Spring/Summer" ~ "S", 
-                                                     season == "Fall/Winter" ~ "W"), 
+  boxplot <- ggplot(df %>% mutate(season = case_when(season == "Spring/Summer 2020" ~ "S", 
+                                                     season == "Fall 2020 - Winter 2021" ~ "W"), 
                                   case = "By Season") %>% 
                       mutate(season = fct_relevel(as.factor(season), "S")), 
                     aes(season, {{var}}, fill = season)) + 

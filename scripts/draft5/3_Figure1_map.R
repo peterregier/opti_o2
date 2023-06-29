@@ -49,7 +49,7 @@ bc_location <- tibble(lat = 46.90577, long = -123.98219) %>%
 ggplot() + 
   geom_sf(data = wa, fill = "gray95") + 
   geom_star(aes(x = -123.98219, y = 46.90577), 
-            size = 3, fill = "red") +
+            size = 5, fill = "red") +
   #geom_sf(data = bc_location, size = 5, color = "red") +
   theme_map()
 ggsave("graphs/1_wa_map_for_Figure1.png", width = 3, height = 2)
@@ -119,7 +119,9 @@ p <- ggplot() +
   geom_point(aes(x = -123.980369, y = 46.905669), size = 5) + 
   geom_point(aes(x = -123.980369, y = 46.905669), size = 3, color = "white") + 
   scale_fill_gradientn(colors = c("#FFFAC2", "#629F6E", "#A2D19A", "#7F583E")) + 
-  scale_alpha(range = c(0, 0.5)) + theme_map()
+  scale_alpha(range = c(0, 0.5)) + 
+  labs(fill = "Elev. \n (m NAVD88)") +
+  theme_map()
 
 p + 
   ggspatial::annotation_scale(
