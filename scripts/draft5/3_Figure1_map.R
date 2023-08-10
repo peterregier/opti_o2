@@ -1,8 +1,8 @@
-## This script creates  portions of the map figure for the Opti-O2 paper reboot.
-## Based largely off of 0_make_map.R from premis_pr. 3 elements are needed:
-## 1. WA map with BC location noted
-## 2. BC watershed with sensor locations noted
-## 3. 2x transects, one for sensor diagram, one for conceptual model
+## This script creates  portions of the map figure for the Opti-O2 paper. 
+## 3 elements are needed:
+### 1. WA map with BC location noted
+### 2. BC watershed with sensor locations noted
+### 3. 2x transects, one for sensor diagram, one for conceptual model
 ##
 ## 2022-10-28 (updated 2023-04-13)
 ## Peter Regier
