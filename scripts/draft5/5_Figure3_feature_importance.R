@@ -96,9 +96,16 @@ print(fi_summary %>%
   group_by(season2, pred2) %>% 
   summarize(fi * 20), n = 50)
 
+
 # 5. Create plot and export ----------------------------------------------------
 
-plot_grid(fi_plot, NULL, variable_plot, nrow = 1, align = "hv",
+figure3 <- plot_grid(fi_plot, NULL, variable_plot, nrow = 1, align = "hv",
           rel_widths = c(0.6, 0.1, 1), labels = c("A", "", "B"))
 ggsave("graphs/3_Figure3_feature_importance.png", width = 10, height = 5)
+
+tiff("graphs/final_tiffs/3_Figure3_feature_importance.tiff", units="in", width=10, height=5, res=300)
+figure3
+dev.off()
+
+
 

@@ -27,9 +27,15 @@ predictions <- read_csv("data/model_predictions.csv") %>%
   mutate(season = case_when(season == "Spring/Summer" ~ "Spring/Summer 2020", 
                             season == "Fall/Winter" ~ "Fall 2020 - Winter 2021"))
 
-ggplot(predictions %>% mutate(season = fct_relevel(base::as.factor(season), "Spring/Summer 2020")), aes(datetime)) + 
+figure4 <- ggplot(predictions %>% mutate(season = fct_relevel(base::as.factor(season), "Spring/Summer 2020")), aes(datetime)) + 
   geom_point(aes(y = seep_do), size = 0.2, color = "gray") + 
   geom_line(aes(y = pred), color = "red", alpha = 0.8) + 
   facet_wrap(~season, scales = "free") + 
   labs(x = "", y = "Seep DO (mg/L)")
 ggsave("graphs/4_Figure4_modeled_v_actual_ts.png", width = 10, height = 4)
+
+tiff("graphs/final_tiffs/4_Figure4_modeled_v_actual_ts.tiff", units="in", width=10, height=4, res=300)
+figure4
+dev.off()
+
+

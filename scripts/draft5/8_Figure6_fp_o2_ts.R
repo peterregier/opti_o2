@@ -83,6 +83,10 @@ q1 <- ggplot(df, aes(datetime, fp_do)) +
   annotate(geom = "text", x = as.POSIXct("2020-05-20"), y = 3, label = "RCP8.5", color = rcp85_color) + 
   labs(x = "", y = "Floodplain DO (mg/L)") 
 
-plot_grid(q0, q1, ncol = 1, align = "hv")
+figure6 <- plot_grid(q0, q1, ncol = 1, align = "hv")
 ggsave("graphs/6_Figure6_flooding_ts.png", width = 7, height = 5)
+
+tiff("graphs/final_tiffs/6_Figure6_flooding_ts.tiff", units="in", width=7, height=5, res=300)
+figure6
+dev.off()
 

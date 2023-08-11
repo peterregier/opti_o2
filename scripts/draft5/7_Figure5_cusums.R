@@ -111,8 +111,12 @@ depth_plot <- plot_cusum(creek_depth_1d, depth_low, depth_high) +
         legend.box.background = element_blank(), 
         legend.position = c(0.8, 0.2))
 
-plot_grid(temp_plot, depth_plot, nrow = 1, labels = c("A", "B"))
+figure5 <- plot_grid(temp_plot, depth_plot, nrow = 1, labels = c("A", "B"))
 ggsave("graphs/5_Figure5_cusums.png", width = 7, height = 3)
+
+tiff("graphs/final_tiffs/5_Figure5_cusums.tiff", units="in", width=7, height=3, res=300)
+figure5
+dev.off()
 
 
 

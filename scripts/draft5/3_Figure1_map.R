@@ -53,6 +53,7 @@ ggplot() +
   #geom_sf(data = bc_location, size = 5, color = "red") +
   theme_map()
 ggsave("graphs/1_wa_map_for_Figure1.png", width = 3, height = 2)
+ggsave("graphs/1_wa_map_for_Figure1.pdf", width = 3, height = 2)
 
 
 # 2. Make the BC map (the heavy lift) ------------------------------------------
@@ -138,7 +139,7 @@ p +
   )
 
 ggsave("graphs/1_bc_map_for_Figure1.png", width = 6, height = 6)
-
+ggsave("graphs/1_bc_map_for_Figure1.pdf", width = 6, height = 6)
 
 # 3. Now, make the transect for the sensor and conceptual diagrams -------------
 

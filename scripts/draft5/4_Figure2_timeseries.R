@@ -88,12 +88,16 @@ plot_ts <- function(var, y_lab){
   plot_grid(ts_plot, boxplot, nrow = 1, rel_widths = c(1, 0.2))
 }
 
-plot_grid(plot_ts(seep_do, "Seep DO (mg/L)"), 
+figure2 <- plot_grid(plot_ts(seep_do, "Seep DO (mg/L)"), 
           plot_ts(air_temp, "Air Temp. (C)"), 
           plot_ts(creek_depth, "Creek depth (cm)"), 
           plot_ts(fp_depth, "FP depth (cm)"), 
           ncol = 1, labels = c("A", "B", "C", "D"))
 ggsave("graphs/2_Figure2_ts.png", width = 10, height = 8)
+
+tiff("graphs/final_tiffs/2_Figure2-TS.tiff", units="in", width=10, height=8, res=300)
+figure2
+dev.off()
 
 
 ## Make supplemental table of means by window
